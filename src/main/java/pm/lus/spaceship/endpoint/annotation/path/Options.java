@@ -13,6 +13,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@PathAnnotation
 public @interface Options {
 
     // The path to introduce

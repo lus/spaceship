@@ -5,9 +5,8 @@ import pm.lus.spaceship.discovery.impl.StaticExplorer;
 import pm.lus.spaceship.endpoint.Controller;
 import pm.lus.spaceship.middleware.Middleware;
 
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Provides helper method to access the bundled {@link Explorer} implementations more intuitive
@@ -39,10 +38,19 @@ public class Discovery {
      * @return The created explorer
      */
     public static Explorer staticDiscovery(final Class<?>... types) {
-        return new StaticExplorer(
-                (Set<Class<? extends Middleware>>) Arrays.stream(types).filter(Middleware.class::isAssignableFrom).collect(Collectors.toSet()),
-                (Set<Class<? extends Controller>>) Arrays.stream(types).filter(Controller.class::isAssignableFrom).collect(Collectors.toSet())
-        );
+        final Set<Class<? extends Middleware>> middlewares = new HashSet<>();
+        final Set<Class<? extends Controller>> controllers = new HashSet<>();
+
+        for (final Class<?> type : types) {
+            if (Middleware.class.isAssignableFrom(type)) {
+                middlewares.add((Class<? extends Middleware>) type);
+            }
+            if (Controller.class.isAssignableFrom(type)) {
+                controllers.add((Class<? extends Controller>) type);
+            }
+        }
+
+        return new StaticExplorer(middlewares, controllers);
     }
 
 }

@@ -22,13 +22,13 @@ public @interface MiddlewareOptions {
     String[] pathBoundaries() default {};
 
     // Whether or not to run this middleware in combination with a cancelled context; allows context resumption
-    boolean force() default false;
+    boolean forced() default false;
 
     // The phase to execute this middleware (BEFORE or AFTER the endpoint)
     Phase phase() default Phase.BEFORE_ENDPOINT;
 
     // The position in the chain this middleware should be placed in
-    ChainPosition order() default ChainPosition.NEUTRAL;
+    ChainPosition chainPosition() default ChainPosition.NEUTRAL;
 
     enum Phase {
         BEFORE_ENDPOINT,
