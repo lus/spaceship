@@ -4,6 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pm.lus.spaceship.endpoint.Controller;
 import pm.lus.spaceship.middleware.Middleware;
+import pm.lus.spaceship.routing.endpoint.controller.ControllerDefinition;
+import pm.lus.spaceship.routing.endpoint.endpoint.EndpointDefinition;
+import pm.lus.spaceship.routing.endpoint.parameter.ParameterDefinition;
+import pm.lus.spaceship.routing.middleware.MiddlewareDefinition;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -75,11 +79,30 @@ public class Router {
         // Create the endpoint definitions
         final Set<EndpointDefinition> endpointDefinitions = new HashSet<>();
         controllerDefinitions.forEach(controllerDefinition -> {
+            methods:
             for (final Method method : controllerDefinition.getInstance().getClass().getDeclaredMethods()) {
                 final EndpointDefinition definition = EndpointDefinition.build(controllerDefinition, method);
-                if (definition != null) {
-                    endpointDefinitions.add(definition);
+                if (definition == null) {
+                    continue;
                 }
+
+                // Check if the endpoint handler defines mandatory parameters after optional parameters, which is unsupported
+                boolean optionalsIntroduced = false;
+                for (final ParameterDefinition parameter : definition.getParameters()) {
+                    if (optionalsIntroduced && !parameter.isOptional()) {
+                        LOGGER.error(
+                                "endpoint handler '{}#{}' uses mandatory parameter(s) after optional parameter(s), which is unsupported; ignoring",
+                                method.getDeclaringClass().getName(),
+                                method.getName()
+                        );
+                        continue methods;
+                    }
+                    if (parameter.isOptional()) {
+                        optionalsIntroduced = true;
+                    }
+                }
+
+                endpointDefinitions.add(definition);
             }
         });
 

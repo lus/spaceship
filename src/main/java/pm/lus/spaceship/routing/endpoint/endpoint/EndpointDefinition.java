@@ -1,14 +1,15 @@
-package pm.lus.spaceship.routing;
+package pm.lus.spaceship.routing.endpoint.endpoint;
 
 import pm.lus.spaceship.endpoint.annotation.path.PathAnnotations;
 import pm.lus.spaceship.request.RequestMethod;
 import pm.lus.spaceship.request.context.RequestContext;
+import pm.lus.spaceship.routing.Router;
+import pm.lus.spaceship.routing.endpoint.controller.ControllerDefinition;
+import pm.lus.spaceship.routing.endpoint.parameter.ParameterDefinition;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Represents a definition of an endpoint for the {@link Router} to work with
@@ -20,23 +21,23 @@ import java.util.List;
 public class EndpointDefinition {
 
     private final Method method;
-    private final ArrayList<Class<?>> parameterTypes;
-    private final String path;
+    private final ParameterDefinition[] parameters;
+    private final PathDefinition path;
     private final RequestMethod[] methods;
 
     private EndpointDefinition(
             final Method method,
-            final ArrayList<Class<?>> parameterTypes,
-            final String path,
+            final ParameterDefinition[] parameters,
+            final PathDefinition path,
             final RequestMethod[] methods
     ) {
         this.method = method;
-        this.parameterTypes = parameterTypes;
+        this.parameters = parameters;
         this.path = path;
         this.methods = methods;
     }
 
-    protected static EndpointDefinition build(final ControllerDefinition controllerDefinition, final Method endpoint) {
+    public static EndpointDefinition build(final ControllerDefinition controllerDefinition, final Method endpoint) {
         Annotation annotationToUse = null;
         for (final Annotation annotation : endpoint.getDeclaredAnnotations()) {
             if (PathAnnotations.isPathAnnotation(annotation)) {
@@ -51,16 +52,18 @@ public class EndpointDefinition {
         if (annotationToUse != null) {
             return new EndpointDefinition(
                     endpoint,
-                    new ArrayList<>(Arrays.asList(Arrays.copyOfRange(endpoint.getParameterTypes(), 1, endpoint.getParameterCount()))),
-                    controllerDefinition.getBasePath() + PathAnnotations.getPath(annotationToUse),
+                    Arrays.stream(Arrays.copyOfRange(endpoint.getParameters(), 1, endpoint.getParameterCount()))
+                            .map(ParameterDefinition::build)
+                            .toArray(ParameterDefinition[]::new),
+                    PathDefinition.build(controllerDefinition.getBasePath() + PathAnnotations.getPath(annotationToUse)),
                     PathAnnotations.getRequestMethods(annotationToUse)
             );
         }
 
         return new EndpointDefinition(
                 endpoint,
-                new ArrayList<>(),
-                controllerDefinition.getBasePath(),
+                new ParameterDefinition[]{},
+                PathDefinition.build(controllerDefinition.getBasePath()),
                 new RequestMethod[]{RequestMethod.GET}
         );
     }
@@ -69,11 +72,11 @@ public class EndpointDefinition {
         return this.method;
     }
 
-    public List<Class<?>> getParameterTypes() {
-        return this.parameterTypes;
+    public ParameterDefinition[] getParameters() {
+        return this.parameters;
     }
 
-    public String getPath() {
+    public PathDefinition getPath() {
         return this.path;
     }
 

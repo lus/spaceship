@@ -1,7 +1,8 @@
-package pm.lus.spaceship.routing;
+package pm.lus.spaceship.routing.endpoint.controller;
 
 import pm.lus.spaceship.endpoint.Controller;
 import pm.lus.spaceship.endpoint.annotation.ControllerOptions;
+import pm.lus.spaceship.routing.Router;
 
 /**
  * Represents a definition of an endpoint controller for the {@link Router} to work with
@@ -20,7 +21,7 @@ public class ControllerDefinition {
         this.basePath = basePath;
     }
 
-    protected static ControllerDefinition build(final Controller instance) {
+    public static ControllerDefinition build(final Controller instance) {
         final Class<? extends Controller> clazz = instance.getClass();
         if (clazz.isAnnotationPresent(ControllerOptions.class)) {
             final ControllerOptions annotation = clazz.getDeclaredAnnotation(ControllerOptions.class);

@@ -1,7 +1,8 @@
-package pm.lus.spaceship.routing;
+package pm.lus.spaceship.routing.middleware;
 
 import pm.lus.spaceship.middleware.Middleware;
 import pm.lus.spaceship.middleware.annotation.MiddlewareOptions;
+import pm.lus.spaceship.routing.Router;
 
 /**
  * Represents a definition of a middleware for the {@link Router} to work with
@@ -35,7 +36,7 @@ public class MiddlewareDefinition {
         this.chainPosition = chainPosition;
     }
 
-    protected static MiddlewareDefinition build(final Middleware instance) {
+    public static MiddlewareDefinition build(final Middleware instance) {
         final Class<? extends Middleware> clazz = instance.getClass();
         if (clazz.isAnnotationPresent(MiddlewareOptions.class)) {
             final MiddlewareOptions options = clazz.getDeclaredAnnotation(MiddlewareOptions.class);
