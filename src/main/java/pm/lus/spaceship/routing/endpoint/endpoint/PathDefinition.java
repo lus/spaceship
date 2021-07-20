@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class PathDefinition {
 
     // Matches any string in the format '{}' or '{someText_-}' (parameters)
-    private static final Pattern PARAMETER_REGEX = Pattern.compile("\\{[a-zA-Z_-]*}");
+    public static final Pattern PARAMETER_REGEX = Pattern.compile("\\{[a-zA-Z_-]*}");
 
     private final String raw;
     private final Pattern pattern;
@@ -32,7 +32,9 @@ public class PathDefinition {
 
         final Matcher matcher = PARAMETER_REGEX.matcher(regex);
         final int parameterCount = (int) matcher.results().count();
-        regex = matcher.replaceAll("\\\\E(.*)\\\\Q");
+        regex = matcher.replaceAll("\\\\E([^\\\\/]*)\\\\Q");
+
+        regex = regex.replace("\\Q\\E", "");
 
         final Pattern pattern = Pattern.compile("^" + regex + "$", Pattern.CASE_INSENSITIVE);
 

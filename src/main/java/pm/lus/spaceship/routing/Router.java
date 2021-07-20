@@ -1,18 +1,10 @@
 package pm.lus.spaceship.routing;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pm.lus.spaceship.endpoint.Controller;
-import pm.lus.spaceship.middleware.Middleware;
 import pm.lus.spaceship.routing.endpoint.controller.ControllerDefinition;
 import pm.lus.spaceship.routing.endpoint.endpoint.EndpointDefinition;
-import pm.lus.spaceship.routing.endpoint.parameter.ParameterDefinition;
+import pm.lus.spaceship.routing.endpoint.parameter.ParameterAdapterRegistry;
 import pm.lus.spaceship.routing.middleware.MiddlewareDefinition;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -24,91 +16,20 @@ import java.util.Set;
  */
 public class Router {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Router.class);
+    private final RouterSettings settings;
+    private final ParameterAdapterRegistry adapters;
 
     private final Set<MiddlewareDefinition> middlewares;
     private final Set<ControllerDefinition> controllers;
     private final Set<EndpointDefinition> endpoints;
 
-    private Router(final Set<MiddlewareDefinition> middlewares, final Set<ControllerDefinition> controllers, final Set<EndpointDefinition> endpoints) {
+    Router(final RouterSettings settings, final ParameterAdapterRegistry adapters, final Set<MiddlewareDefinition> middlewares, final Set<ControllerDefinition> controllers, final Set<EndpointDefinition> endpoints) {
+        this.settings = settings;
+        this.adapters = adapters;
+
         this.middlewares = middlewares;
         this.controllers = controllers;
         this.endpoints = endpoints;
     }
-
-    /**
-     * Builds middleware, controller and endpoint definitions using the base classes and creates a new router using them
-     *
-     * @param middlewares The middleware base classes to use
-     * @param controllers The controller base classes to use
-     * @return The created router
-     */
-    public static Router initialize(final Set<Class<? extends Middleware>> middlewares, final Set<Class<? extends Controller>> controllers) {
-        // Create the middleware definitions
-        final Set<MiddlewareDefinition> middlewareDefinitions = new HashSet<>();
-        middlewares.forEach(middlewareClass -> {
-            final Middleware instance;
-            try {
-                final Constructor<? extends Middleware> constructor = middlewareClass.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                instance = constructor.newInstance();
-            } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException exception) {
-                LOGGER.error("middleware '{}' does not have an empty constructor to instantiate it; ignoring!", middlewareClass.getName());
-                return;
-            }
-
-            middlewareDefinitions.add(MiddlewareDefinition.build(instance));
-        });
-
-        // Create the controller definitions
-        final Set<ControllerDefinition> controllerDefinitions = new HashSet<>();
-        controllers.forEach(controllerClass -> {
-            final Controller instance;
-            try {
-                final Constructor<? extends Controller> constructor = controllerClass.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                instance = constructor.newInstance();
-            } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException exception) {
-                LOGGER.error("controller '{}' does not have an empty constructor to instantiate it; ignoring!", controllerClass.getName());
-                return;
-            }
-
-            controllerDefinitions.add(ControllerDefinition.build(instance));
-        });
-
-        // Create the endpoint definitions
-        final Set<EndpointDefinition> endpointDefinitions = new HashSet<>();
-        controllerDefinitions.forEach(controllerDefinition -> {
-            methods:
-            for (final Method method : controllerDefinition.getInstance().getClass().getDeclaredMethods()) {
-                final EndpointDefinition definition = EndpointDefinition.build(controllerDefinition, method);
-                if (definition == null) {
-                    continue;
-                }
-
-                // Check if the endpoint handler defines mandatory parameters after optional parameters, which is unsupported
-                boolean optionalsIntroduced = false;
-                for (final ParameterDefinition parameter : definition.getParameters()) {
-                    if (optionalsIntroduced && !parameter.isOptional()) {
-                        LOGGER.error(
-                                "endpoint handler '{}#{}' uses mandatory parameter(s) after optional parameter(s), which is unsupported; ignoring",
-                                method.getDeclaringClass().getName(),
-                                method.getName()
-                        );
-                        continue methods;
-                    }
-                    if (parameter.isOptional()) {
-                        optionalsIntroduced = true;
-                    }
-                }
-
-                endpointDefinitions.add(definition);
-            }
-        });
-
-        return new Router(middlewareDefinitions, controllerDefinitions, endpointDefinitions);
-    }
-
-    // TODO: Implement execution chain building
 
 }

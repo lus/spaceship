@@ -10,6 +10,8 @@ import pm.lus.spaceship.routing.endpoint.parameter.ParameterDefinition;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Represents a definition of an endpoint for the {@link Router} to work with
@@ -19,17 +21,17 @@ import java.util.Arrays;
  * @since 0.1.0
  */
 public class EndpointDefinition {
-
+    
     private final Method method;
     private final ParameterDefinition[] parameters;
     private final PathDefinition path;
-    private final RequestMethod[] methods;
+    private final List<RequestMethod> methods;
 
     private EndpointDefinition(
             final Method method,
             final ParameterDefinition[] parameters,
             final PathDefinition path,
-            final RequestMethod[] methods
+            final List<RequestMethod> methods
     ) {
         this.method = method;
         this.parameters = parameters;
@@ -56,7 +58,7 @@ public class EndpointDefinition {
                             .map(ParameterDefinition::build)
                             .toArray(ParameterDefinition[]::new),
                     PathDefinition.build(controllerDefinition.getBasePath() + PathAnnotations.getPath(annotationToUse)),
-                    PathAnnotations.getRequestMethods(annotationToUse)
+                    Arrays.asList(PathAnnotations.getRequestMethods(annotationToUse))
             );
         }
 
@@ -64,7 +66,7 @@ public class EndpointDefinition {
                 endpoint,
                 new ParameterDefinition[]{},
                 PathDefinition.build(controllerDefinition.getBasePath()),
-                new RequestMethod[]{RequestMethod.GET}
+                Collections.singletonList(RequestMethod.GET)
         );
     }
 
@@ -80,7 +82,7 @@ public class EndpointDefinition {
         return this.path;
     }
 
-    public RequestMethod[] getMethods() {
+    public List<RequestMethod> getMethods() {
         return this.methods;
     }
 
