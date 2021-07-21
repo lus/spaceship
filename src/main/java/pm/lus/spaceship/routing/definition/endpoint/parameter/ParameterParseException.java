@@ -1,4 +1,4 @@
-package pm.lus.spaceship.routing.endpoint.parameter;
+package pm.lus.spaceship.routing.definition.endpoint.parameter;
 
 /**
  * Gets thrown whenever a value cannot be parsed by a {@link ParameterAdapter}

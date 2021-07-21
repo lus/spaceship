@@ -1,8 +1,8 @@
 package pm.lus.spaceship.discovery.impl;
 
 import org.reflections.Reflections;
+import pm.lus.spaceship.controller.Controller;
 import pm.lus.spaceship.discovery.Explorer;
-import pm.lus.spaceship.endpoint.Controller;
 import pm.lus.spaceship.middleware.Middleware;
 
 import java.util.Set;

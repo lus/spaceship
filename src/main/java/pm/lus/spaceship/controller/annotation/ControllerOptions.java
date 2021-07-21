@@ -1,4 +1,4 @@
-package pm.lus.spaceship.endpoint.annotation;
+package pm.lus.spaceship.controller.annotation;
 
 import java.lang.annotation.*;
 

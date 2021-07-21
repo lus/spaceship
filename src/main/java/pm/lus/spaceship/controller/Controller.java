@@ -1,4 +1,4 @@
-package pm.lus.spaceship.endpoint;
+package pm.lus.spaceship.controller;
 
 /**
  * Marks a class as an endpoint controller

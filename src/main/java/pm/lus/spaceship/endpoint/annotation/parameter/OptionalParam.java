@@ -1,4 +1,4 @@
-package pm.lus.spaceship.routing.endpoint.parameter;
+package pm.lus.spaceship.endpoint.annotation.parameter;
 
 import java.lang.annotation.*;
 

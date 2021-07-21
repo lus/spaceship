@@ -1,6 +1,6 @@
 package pm.lus.spaceship.source;
 
-import pm.lus.spaceship.endpoint.Controller;
+import pm.lus.spaceship.controller.Controller;
 import pm.lus.spaceship.endpoint.annotation.path.Get;
 import pm.lus.spaceship.endpoint.annotation.path.Patch;
 import pm.lus.spaceship.endpoint.annotation.path.Post;

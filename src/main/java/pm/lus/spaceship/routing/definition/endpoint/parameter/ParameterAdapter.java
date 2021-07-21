@@ -1,4 +1,4 @@
-package pm.lus.spaceship.routing.endpoint.parameter;
+package pm.lus.spaceship.routing.definition.endpoint.parameter;
 
 /**
  * Has to be implemented for types that should be able to be passed to endpoint handlers as parameters

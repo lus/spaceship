@@ -1,6 +1,6 @@
 package pm.lus.spaceship.discovery;
 
-import pm.lus.spaceship.endpoint.Controller;
+import pm.lus.spaceship.controller.Controller;
 import pm.lus.spaceship.middleware.Middleware;
 
 import java.util.Set;

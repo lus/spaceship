@@ -2,22 +2,23 @@ package pm.lus.spaceship.routing;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pm.lus.spaceship.endpoint.Controller;
+import pm.lus.spaceship.controller.Controller;
 import pm.lus.spaceship.middleware.Middleware;
-import pm.lus.spaceship.routing.endpoint.controller.ControllerDefinition;
-import pm.lus.spaceship.routing.endpoint.endpoint.EndpointDefinition;
-import pm.lus.spaceship.routing.endpoint.endpoint.PathDefinition;
-import pm.lus.spaceship.routing.endpoint.parameter.ParameterAdapterRegistry;
-import pm.lus.spaceship.routing.endpoint.parameter.ParameterDefinition;
-import pm.lus.spaceship.routing.middleware.MiddlewareDefinition;
+import pm.lus.spaceship.routing.definition.controller.ControllerDefinition;
+import pm.lus.spaceship.routing.definition.endpoint.EndpointDefinition;
+import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterAdapterRegistry;
+import pm.lus.spaceship.routing.definition.endpoint.path.parts.EmptyPart;
+import pm.lus.spaceship.routing.definition.endpoint.path.parts.LiteralPart;
+import pm.lus.spaceship.routing.definition.endpoint.path.parts.ParameterPart;
+import pm.lus.spaceship.routing.definition.endpoint.path.parts.PathPart;
+import pm.lus.spaceship.routing.definition.middleware.MiddlewareDefinition;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Provides a way of creating a new {@link Router} while building and validating all needed definitions
@@ -59,33 +60,33 @@ public class RouterFactory {
         // Create the middleware definitions
         final Set<MiddlewareDefinition> middlewareDefinitions = new HashSet<>();
         middlewares.forEach(middlewareClass -> {
-            final Middleware instance;
+            final MiddlewareDefinition definition;
             try {
-                final Constructor<? extends Middleware> constructor = middlewareClass.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                instance = constructor.newInstance();
-            } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException exception) {
-                LOGGER.error("middleware '{}' does not have an empty constructor to instantiate it; ignoring!", middlewareClass.getName());
+                definition = MiddlewareDefinition.build(middlewareClass);
+            } catch (final Exception exception) {
+                LOGGER.error(
+                        String.format("could not define middleware '%s'; skipping!", middlewareClass.getName()),
+                        exception
+                );
                 return;
             }
-
-            middlewareDefinitions.add(MiddlewareDefinition.build(instance));
+            middlewareDefinitions.add(definition);
         });
 
         // Create the controller definitions
         final Set<ControllerDefinition> controllerDefinitions = new HashSet<>();
         controllers.forEach(controllerClass -> {
-            final Controller instance;
+            final ControllerDefinition definition;
             try {
-                final Constructor<? extends Controller> constructor = controllerClass.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                instance = constructor.newInstance();
-            } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException exception) {
-                LOGGER.error("controller '{}' does not have an empty constructor to instantiate it; ignoring!", controllerClass.getName());
+                definition = ControllerDefinition.build(controllerClass);
+            } catch (final Exception exception) {
+                LOGGER.error(
+                        String.format("could not define controller '%s'; skipping!", controllerClass.getName()),
+                        exception
+                );
                 return;
             }
-
-            controllerDefinitions.add(ControllerDefinition.build(instance));
+            controllerDefinitions.add(definition);
         });
 
         // Create the endpoint definitions
@@ -93,42 +94,26 @@ public class RouterFactory {
         controllerDefinitions.forEach(controllerDefinition -> {
             methods:
             for (final Method method : controllerDefinition.getInstance().getClass().getDeclaredMethods()) {
-                final EndpointDefinition definition = EndpointDefinition.build(controllerDefinition, method);
-                if (definition == null) {
-                    continue;
-                }
-
-                // Check if the method signature has another parameter count than the route definition
-                if (definition.getPath().getParameterCount() != definition.getParameters().length) {
+                // Try to define the endpoint
+                final EndpointDefinition definition;
+                try {
+                    definition = EndpointDefinition.build(controllerDefinition, method);
+                } catch (final Exception exception) {
                     LOGGER.error(
-                            "endpoint handler '{}#{}' defines more/less arguments than present in its route definition; ignoring!",
-                            method.getDeclaringClass().getName(),
-                            method.getName()
+                            String.format("could not define endpoint handler '%s#%s'; skipping!", method.getDeclaringClass().getName(), method.getName()),
+                            exception
                     );
                     continue;
                 }
-
-                // Check if the endpoint handler defines mandatory parameters after optional parameters, which is unsupported
-                boolean optionalsIntroduced = false;
-                for (final ParameterDefinition parameter : definition.getParameters()) {
-                    if (optionalsIntroduced && !parameter.isOptional()) {
-                        LOGGER.error(
-                                "endpoint handler '{}#{}' uses mandatory parameter(s) after optional parameter(s), which is unsupported; ignoring!",
-                                method.getDeclaringClass().getName(),
-                                method.getName()
-                        );
-                        continue methods;
-                    }
-                    if (parameter.isOptional()) {
-                        optionalsIntroduced = true;
-                    }
+                if (definition == null) {
+                    continue;
                 }
 
                 // Check if the endpoint definition interferes with another, already registered one
                 for (final EndpointDefinition other : endpointDefinitions) {
                     if (doInterfere(settings, definition, other)) {
                         LOGGER.error(
-                                "endpoint handler '{}#{}' interferes with another one ('{}#{}'); ignoring!",
+                                "endpoint handler '{}#{}' interferes with another one ('{}#{}'); skipping!",
                                 method.getDeclaringClass().getName(),
                                 method.getName(),
                                 other.getMethod().getDeclaringClass().getName(),
@@ -154,58 +139,98 @@ public class RouterFactory {
             return false;
         }
 
-        String firstPath = first.getPath().getRaw();
-        String secondPath = second.getPath().getRaw();
+        final List<PathPart> firstParts = first.getPath().getParts();
+        final List<PathPart> secondParts = second.getPath().getParts();
 
-        // Find the maximum amount of mandatory parameters of one of the two paths
-        final long firstMandatory = Arrays.stream(first.getParameters()).filter(definition -> !definition.isOptional()).count();
-        final long secondMandatory = Arrays.stream(second.getParameters()).filter(definition -> !definition.isOptional()).count();
-        final int amountToLimitTo = (int) Math.max(firstMandatory, secondMandatory);
-
-        // Replace all surplus parameters in the first path
-        final AtomicInteger found = new AtomicInteger();
-        firstPath = PathDefinition.PARAMETER_REGEX.matcher(firstPath).replaceAll(result -> {
-            if (found.incrementAndGet() > amountToLimitTo) {
-                return "";
-            }
-            return result.group();
-        });
-
-        // Replace all surplus parameters in the second path
-        found.set(0);
-        secondPath = PathDefinition.PARAMETER_REGEX.matcher(secondPath).replaceAll(result -> {
-            if (found.incrementAndGet() > amountToLimitTo) {
-                return "";
-            }
-            return result.group();
-        });
-
-        // Remove trailing slashes if the router ignores them
-        if (settings.doIgnoreTrailingSlashes()) {
-            firstPath = firstPath.replaceAll("/+$", "");
-            secondPath = secondPath.replaceAll("/+$", "");
+        // Remove the potential leading slash out of both lists
+        if (firstParts.size() > 0 && firstParts.get(0) instanceof EmptyPart) {
+            firstParts.remove(0);
+        }
+        if (secondParts.size() > 0 && secondParts.get(0) instanceof EmptyPart) {
+            secondParts.remove(0);
         }
 
-        // Remove stacked slashes ('//...') if the router ignores them
+        // Both paths match the root path (/)
+        if (firstParts.isEmpty() && secondParts.isEmpty()) {
+            return true;
+        }
+
+        // Remove any empty path parts out of the part lists if stacked slashes should be ignored
         if (settings.doIgnoreStackedSlashes()) {
-            firstPath = firstPath.replaceAll("/+", "/");
-            secondPath = secondPath.replaceAll("/+", "/");
+            for (final ListIterator<PathPart> iterator = firstParts.listIterator(); iterator.hasNext(); ) {
+                if (iterator.nextIndex() < firstParts.size() - 1 && iterator.next() instanceof EmptyPart) {
+                    iterator.remove();
+                }
+            }
+
+            for (final ListIterator<PathPart> iterator = secondParts.listIterator(); iterator.hasNext(); ) {
+                if (iterator.nextIndex() < secondParts.size() - 1 && iterator.next() instanceof EmptyPart) {
+                    iterator.remove();
+                }
+            }
         }
 
-        // Check if the paths interfere after processing
-        final boolean pathsInterfere = settings.doIgnoreCase() ? firstPath.equalsIgnoreCase(secondPath) : firstPath.equals(secondPath);
-        if (!pathsInterfere) {
+        // Remove any trailing empty path parts out of the part lists if trailing slashes should be ignored
+        if (settings.doIgnoreTrailingSlashes()) {
+            for (final ListIterator<PathPart> iterator = firstParts.listIterator(firstParts.size()); iterator.hasPrevious(); ) {
+                if (iterator.previous() instanceof EmptyPart) {
+                    iterator.remove();
+                } else {
+                    break;
+                }
+            }
+
+            for (final ListIterator<PathPart> iterator = secondParts.listIterator(secondParts.size()); iterator.hasPrevious(); ) {
+                if (iterator.previous() instanceof EmptyPart) {
+                    iterator.remove();
+                } else {
+                    break;
+                }
+            }
+        }
+
+        // Determine the maximum amount of required parameters of one of the two part lists
+        final long firstRequiredParameters = firstParts.stream().filter(part -> part instanceof ParameterPart && !((ParameterPart) part).isOptional()).count();
+        final long secondRequiredParameters = secondParts.stream().filter(part -> part instanceof ParameterPart && !((ParameterPart) part).isOptional()).count();
+        final long limit = Math.max(firstRequiredParameters, secondRequiredParameters);
+
+        // Remove any surplus parameters from both lists
+        firstParts.removeAll(
+                firstParts.stream()
+                        .filter(part -> part instanceof ParameterPart)
+                        .skip(limit)
+                        .collect(Collectors.toList())
+        );
+        secondParts.removeAll(
+                secondParts.stream()
+                        .filter(part -> part instanceof ParameterPart)
+                        .skip(limit)
+                        .collect(Collectors.toList())
+        );
+
+        // If the remaining lists don't equal in length, they cannot interfere each other
+        if (firstParts.size() != secondParts.size()) {
             return false;
         }
 
-        // Check if the parameter types are the same
-        final Class<?>[] firstParameterTypes = Arrays.stream(Arrays.copyOfRange(first.getParameters(), 0, amountToLimitTo))
-                .map(ParameterDefinition::getType)
-                .toArray(Class<?>[]::new);
-        final Class<?>[] secondParameterTypes = Arrays.stream(Arrays.copyOfRange(second.getParameters(), 0, amountToLimitTo))
-                .map(ParameterDefinition::getType)
-                .toArray(Class<?>[]::new);
-        return Arrays.equals(firstParameterTypes, secondParameterTypes);
+        // Compare every single part of both lists
+        for (int i = 0; i < firstParts.size(); i++) {
+            final PathPart firstPart = firstParts.get(i);
+            final PathPart secondPart = secondParts.get(i);
+
+            boolean matches = false;
+            if (settings.doIgnoreCase() && firstPart instanceof LiteralPart && secondPart instanceof LiteralPart) {
+                matches = ((LiteralPart) firstPart).matchesCaseInsensitive(secondPart);
+            } else {
+                matches = firstPart.matches(secondPart);
+            }
+
+            if (!matches) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

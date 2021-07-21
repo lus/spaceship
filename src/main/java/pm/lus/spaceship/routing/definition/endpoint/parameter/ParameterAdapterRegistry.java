@@ -1,4 +1,4 @@
-package pm.lus.spaceship.routing.endpoint.parameter;
+package pm.lus.spaceship.routing.definition.endpoint.parameter;
 
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +67,7 @@ public class ParameterAdapterRegistry {
             this.adapter = adapter;
             this.weight = weight;
         }
-        
+
         public ParameterAdapter<?> getAdapter() {
             return this.adapter;
         }

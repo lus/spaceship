@@ -1,8 +1,12 @@
-package pm.lus.spaceship.routing.middleware;
+package pm.lus.spaceship.routing.definition.middleware;
 
 import pm.lus.spaceship.middleware.Middleware;
 import pm.lus.spaceship.middleware.annotation.MiddlewareOptions;
 import pm.lus.spaceship.routing.Router;
+import pm.lus.spaceship.routing.definition.DefinitionBuildingException;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Represents a definition of a middleware for the {@link Router} to work with
@@ -36,8 +40,18 @@ public class MiddlewareDefinition {
         this.chainPosition = chainPosition;
     }
 
-    public static MiddlewareDefinition build(final Middleware instance) {
-        final Class<? extends Middleware> clazz = instance.getClass();
+    public static MiddlewareDefinition build(final Class<? extends Middleware> clazz) throws DefinitionBuildingException {
+        // Try to instantiate the middleware class
+        final Middleware instance;
+        try {
+            final Constructor<? extends Middleware> constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            instance = constructor.newInstance();
+        } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException exception) {
+            throw new DefinitionBuildingException("no empty constructor present to use for instantiation");
+        }
+
+        // Apply addition options to the middleware if the corresponding annotation is present
         if (clazz.isAnnotationPresent(MiddlewareOptions.class)) {
             final MiddlewareOptions options = clazz.getDeclaredAnnotation(MiddlewareOptions.class);
             new MiddlewareDefinition(

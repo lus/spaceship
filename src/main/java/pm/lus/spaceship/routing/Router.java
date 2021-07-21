@@ -1,9 +1,9 @@
 package pm.lus.spaceship.routing;
 
-import pm.lus.spaceship.routing.endpoint.controller.ControllerDefinition;
-import pm.lus.spaceship.routing.endpoint.endpoint.EndpointDefinition;
-import pm.lus.spaceship.routing.endpoint.parameter.ParameterAdapterRegistry;
-import pm.lus.spaceship.routing.middleware.MiddlewareDefinition;
+import pm.lus.spaceship.routing.definition.controller.ControllerDefinition;
+import pm.lus.spaceship.routing.definition.endpoint.EndpointDefinition;
+import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterAdapterRegistry;
+import pm.lus.spaceship.routing.definition.middleware.MiddlewareDefinition;
 
 import java.util.Set;
 

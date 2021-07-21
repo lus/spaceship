@@ -1,7 +1,9 @@
-package pm.lus.spaceship.routing.endpoint.parameter;
+package pm.lus.spaceship.routing.definition.endpoint.parameter;
 
+import pm.lus.spaceship.endpoint.annotation.parameter.OptionalParam;
 import pm.lus.spaceship.routing.Router;
-import pm.lus.spaceship.routing.endpoint.endpoint.EndpointDefinition;
+import pm.lus.spaceship.routing.definition.DefinitionBuildingException;
+import pm.lus.spaceship.routing.definition.endpoint.EndpointDefinition;
 
 import java.lang.reflect.Parameter;
 import java.util.Map;
@@ -49,7 +51,11 @@ public class ParameterDefinition {
         this.defaultValue = defaultValue;
     }
 
-    public static ParameterDefinition build(final Parameter parameter) {
+    public static ParameterDefinition build(final Parameter parameter) throws DefinitionBuildingException {
+        if (parameter.isVarArgs()) {
+            throw new DefinitionBuildingException("VarArgs is not supported for parameters");
+        }
+
         final boolean isOptional = parameter.isAnnotationPresent(OptionalParam.class);
 
         String defaultValue = null;
