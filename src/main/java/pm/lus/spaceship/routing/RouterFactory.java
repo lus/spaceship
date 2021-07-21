@@ -158,13 +158,13 @@ public class RouterFactory {
         // Remove any empty path parts out of the part lists if stacked slashes should be ignored
         if (settings.doIgnoreStackedSlashes()) {
             for (final ListIterator<PathPart> iterator = firstParts.listIterator(); iterator.hasNext(); ) {
-                if (iterator.nextIndex() < firstParts.size() - 1 && iterator.next() instanceof EmptyPart) {
+                if (iterator.nextIndex() < firstParts.size() - 1 & iterator.next() instanceof EmptyPart) {
                     iterator.remove();
                 }
             }
 
             for (final ListIterator<PathPart> iterator = secondParts.listIterator(); iterator.hasNext(); ) {
-                if (iterator.nextIndex() < secondParts.size() - 1 && iterator.next() instanceof EmptyPart) {
+                if (iterator.nextIndex() < secondParts.size() - 1 & iterator.next() instanceof EmptyPart) {
                     iterator.remove();
                 }
             }
@@ -218,7 +218,7 @@ public class RouterFactory {
             final PathPart firstPart = firstParts.get(i);
             final PathPart secondPart = secondParts.get(i);
 
-            boolean matches = false;
+            final boolean matches;
             if (settings.doIgnoreCase() && firstPart instanceof LiteralPart && secondPart instanceof LiteralPart) {
                 matches = ((LiteralPart) firstPart).matchesCaseInsensitive(secondPart);
             } else {

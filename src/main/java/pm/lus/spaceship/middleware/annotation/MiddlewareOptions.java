@@ -18,9 +18,6 @@ public @interface MiddlewareOptions {
     // Whether or not to run this middleware in combination with every endpoint that does not explicitly block it
     boolean runByDefault() default false;
 
-    // Optional paths this middleware is bound to if it is not explicitly bound to an endpoint
-    String[] pathBoundaries() default {};
-
     // Whether or not to run this middleware in combination with a cancelled context; allows context resumption
     boolean forced() default false;
 

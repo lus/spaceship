@@ -1,6 +1,8 @@
 package pm.lus.spaceship.routing.definition.endpoint;
 
+import pm.lus.spaceship.endpoint.annotation.EndpointOptions;
 import pm.lus.spaceship.endpoint.annotation.path.PathAnnotations;
+import pm.lus.spaceship.middleware.Middleware;
 import pm.lus.spaceship.request.RequestMethod;
 import pm.lus.spaceship.request.context.RequestContext;
 import pm.lus.spaceship.routing.Router;
@@ -28,16 +30,25 @@ public class EndpointDefinition {
 
     private final Method method;
     private final PathDefinition path;
+    private final List<ParameterDefinition> parameters;
     private final List<RequestMethod> methods;
+    private final List<Class<? extends Middleware>> middlewares;
+    private final List<Class<? extends Middleware>> blockedMiddlewares;
 
     private EndpointDefinition(
             final Method method,
             final PathDefinition path,
-            final List<RequestMethod> methods
+            final List<ParameterDefinition> parameters,
+            final List<RequestMethod> methods,
+            final List<Class<? extends Middleware>> middlewares,
+            final List<Class<? extends Middleware>> blockedMiddlewares
     ) {
         this.method = method;
         this.path = path;
+        this.parameters = parameters;
         this.methods = methods;
+        this.middlewares = middlewares;
+        this.blockedMiddlewares = blockedMiddlewares;
     }
 
     public static EndpointDefinition build(final ControllerDefinition controllerDefinition, final Method endpoint) throws DefinitionBuildingException {
@@ -82,10 +93,22 @@ public class EndpointDefinition {
                 ? Arrays.asList(PathAnnotations.getRequestMethods(annotationToUse))
                 : Collections.singletonList(RequestMethod.GET);
 
+        // Check if options should be applied
+        final List<Class<? extends Middleware>> middlewares = new ArrayList<>();
+        final List<Class<? extends Middleware>> blockedMiddlewares = new ArrayList<>();
+        if (endpoint.isAnnotationPresent(EndpointOptions.class)) {
+            final EndpointOptions options = endpoint.getAnnotation(EndpointOptions.class);
+            middlewares.addAll(Arrays.asList(options.middlewares()));
+            blockedMiddlewares.addAll(Arrays.asList(options.blockedMiddlewares()));
+        }
+
         return new EndpointDefinition(
                 endpoint,
                 pathDefinition,
-                methods
+                parameters,
+                methods,
+                middlewares,
+                blockedMiddlewares
         );
     }
 
@@ -97,8 +120,20 @@ public class EndpointDefinition {
         return this.path;
     }
 
+    public List<ParameterDefinition> getParameters() {
+        return this.parameters;
+    }
+
     public List<RequestMethod> getMethods() {
         return this.methods;
     }
 
+    public List<Class<? extends Middleware>> getMiddlewares() {
+        return middlewares;
+    }
+
+    public List<Class<? extends Middleware>> getBlockedMiddlewares() {
+        return blockedMiddlewares;
+    }
+    
 }

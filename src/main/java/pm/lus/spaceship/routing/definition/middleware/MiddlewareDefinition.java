@@ -19,7 +19,6 @@ public class MiddlewareDefinition {
 
     private final Middleware instance;
     private final boolean runByDefault;
-    private final String[] pathBoundaries;
     private final boolean forced;
     private final MiddlewareOptions.Phase phase;
     private final MiddlewareOptions.ChainPosition chainPosition;
@@ -27,14 +26,12 @@ public class MiddlewareDefinition {
     private MiddlewareDefinition(
             final Middleware instance,
             final boolean runByDefault,
-            final String[] pathBoundaries,
             final boolean forced,
             final MiddlewareOptions.Phase phase,
             final MiddlewareOptions.ChainPosition chainPosition
     ) {
         this.instance = instance;
         this.runByDefault = runByDefault;
-        this.pathBoundaries = pathBoundaries;
         this.forced = forced;
         this.phase = phase;
         this.chainPosition = chainPosition;
@@ -57,7 +54,6 @@ public class MiddlewareDefinition {
             new MiddlewareDefinition(
                     instance,
                     options.runByDefault(),
-                    options.pathBoundaries(),
                     options.forced(),
                     options.phase(),
                     options.chainPosition()
@@ -67,7 +63,6 @@ public class MiddlewareDefinition {
         return new MiddlewareDefinition(
                 instance,
                 false,
-                new String[]{},
                 false,
                 MiddlewareOptions.Phase.BEFORE_ENDPOINT,
                 MiddlewareOptions.ChainPosition.NEUTRAL
@@ -80,10 +75,6 @@ public class MiddlewareDefinition {
 
     public boolean shouldRunByDefault() {
         return this.runByDefault;
-    }
-
-    public String[] getPathBoundaries() {
-        return this.pathBoundaries;
     }
 
     public boolean isForced() {
