@@ -1,5 +1,6 @@
 package pm.lus.spaceship.routing.definition.endpoint;
 
+import pm.lus.spaceship.controller.Controller;
 import pm.lus.spaceship.endpoint.annotation.EndpointOptions;
 import pm.lus.spaceship.endpoint.annotation.path.PathAnnotations;
 import pm.lus.spaceship.middleware.Middleware;
@@ -28,6 +29,7 @@ import java.util.List;
  */
 public class EndpointDefinition {
 
+    private final Controller controllerInstance;
     private final Method method;
     private final PathDefinition path;
     private final List<ParameterDefinition> parameters;
@@ -36,6 +38,7 @@ public class EndpointDefinition {
     private final List<Class<? extends Middleware>> blockedMiddlewares;
 
     private EndpointDefinition(
+            final Controller controllerInstance,
             final Method method,
             final PathDefinition path,
             final List<ParameterDefinition> parameters,
@@ -43,6 +46,7 @@ public class EndpointDefinition {
             final List<Class<? extends Middleware>> middlewares,
             final List<Class<? extends Middleware>> blockedMiddlewares
     ) {
+        this.controllerInstance = controllerInstance;
         this.method = method;
         this.path = path;
         this.parameters = parameters;
@@ -103,6 +107,7 @@ public class EndpointDefinition {
         }
 
         return new EndpointDefinition(
+                controllerDefinition.getInstance(),
                 endpoint,
                 pathDefinition,
                 parameters,
@@ -110,6 +115,10 @@ public class EndpointDefinition {
                 middlewares,
                 blockedMiddlewares
         );
+    }
+
+    public Controller getControllerInstance() {
+        return this.controllerInstance;
     }
 
     public Method getMethod() {
@@ -129,11 +138,11 @@ public class EndpointDefinition {
     }
 
     public List<Class<? extends Middleware>> getMiddlewares() {
-        return middlewares;
+        return this.middlewares;
     }
 
     public List<Class<? extends Middleware>> getBlockedMiddlewares() {
-        return blockedMiddlewares;
+        return this.blockedMiddlewares;
     }
-    
+
 }

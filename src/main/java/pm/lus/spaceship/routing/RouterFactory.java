@@ -3,6 +3,7 @@ package pm.lus.spaceship.routing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pm.lus.spaceship.controller.Controller;
+import pm.lus.spaceship.dependency.DependencyInjector;
 import pm.lus.spaceship.middleware.Middleware;
 import pm.lus.spaceship.routing.definition.controller.ControllerDefinition;
 import pm.lus.spaceship.routing.definition.endpoint.EndpointDefinition;
@@ -52,11 +53,18 @@ public class RouterFactory {
      *
      * @param settings                 The router settings to apply
      * @param parameterAdapterRegistry The parameter adapter registry to use
+     * @param dependencyInjector       The dependency injector to use to inject dependencies into the instantiated objects
      * @param middlewares              The middleware base classes to use
      * @param controllers              The controller base classes to use
      * @return The created router
      */
-    public static Router create(final RouterSettings settings, final ParameterAdapterRegistry parameterAdapterRegistry, final Set<Class<? extends Middleware>> middlewares, final Set<Class<? extends Controller>> controllers) {
+    public static Router create(
+            final RouterSettings settings,
+            final ParameterAdapterRegistry parameterAdapterRegistry,
+            final DependencyInjector dependencyInjector,
+            final Set<Class<? extends Middleware>> middlewares,
+            final Set<Class<? extends Controller>> controllers
+    ) {
         // Create the middleware definitions
         final Set<MiddlewareDefinition> middlewareDefinitions = new HashSet<>();
         middlewares.forEach(middlewareClass -> {
@@ -70,6 +78,7 @@ public class RouterFactory {
                 );
                 return;
             }
+            dependencyInjector.inject(definition.getInstance());
             middlewareDefinitions.add(definition);
         });
 
@@ -86,6 +95,7 @@ public class RouterFactory {
                 );
                 return;
             }
+            dependencyInjector.inject(definition.getInstance());
             controllerDefinitions.add(definition);
         });
 
