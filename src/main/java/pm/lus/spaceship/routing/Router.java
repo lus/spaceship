@@ -124,6 +124,7 @@ public class Router {
                 switch (middleware.getPhase()) {
                     case BEFORE_ENDPOINT:
                         middlewaresBeforeEndpoint.add(middleware);
+                        break;
                     case AFTER_ENDPOINT:
                         middlewaresAfterEndpoint.add(middleware);
                 }

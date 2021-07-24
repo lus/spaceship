@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Provides helper method to access the bundled {@link Explorer} implementations more intuitive
+ * Provides helper methods to access the bundled {@link Explorer} implementations more intuitive
  *
  * @author Lukas Schulte Pelkum
  * @version 0.1.0

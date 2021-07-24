@@ -3,6 +3,7 @@ package pm.lus.spaceship.server;
 import pm.lus.spaceship.request.HttpRequest;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -18,10 +19,11 @@ public interface HttpServer {
     /**
      * Asynchronously starts this HTTP server
      *
-     * @param address The socket address the server should listen on
+     * @param address  The socket address the server should listen on
+     * @param executor The executor incoming requests should be handed to
      * @throws Exception Any implementation-specific exception during the startup period
      */
-    void start(InetSocketAddress address) throws Exception;
+    void start(InetSocketAddress address, Executor executor) throws Exception;
 
     /**
      * Gracefully and synchronously shuts down this HTTP server

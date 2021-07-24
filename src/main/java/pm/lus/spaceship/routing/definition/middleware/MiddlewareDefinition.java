@@ -51,7 +51,7 @@ public class MiddlewareDefinition {
         // Apply addition options to the middleware if the corresponding annotation is present
         if (clazz.isAnnotationPresent(MiddlewareOptions.class)) {
             final MiddlewareOptions options = clazz.getDeclaredAnnotation(MiddlewareOptions.class);
-            new MiddlewareDefinition(
+            return new MiddlewareDefinition(
                     instance,
                     options.runByDefault(),
                     options.forced(),

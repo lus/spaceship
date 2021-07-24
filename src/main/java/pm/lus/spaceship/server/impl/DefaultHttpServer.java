@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -34,9 +34,9 @@ public class DefaultHttpServer implements HttpServer {
     }
 
     @Override
-    public void start(final InetSocketAddress address) throws IOException {
+    public void start(final InetSocketAddress address, final Executor executor) throws IOException {
         this.server = com.sun.net.httpserver.HttpServer.create(address, 0);
-        this.server.setExecutor(Executors.newCachedThreadPool());
+        this.server.setExecutor(executor);
         this.server.start();
         this.server.createContext("/", this::acceptRequest);
     }
