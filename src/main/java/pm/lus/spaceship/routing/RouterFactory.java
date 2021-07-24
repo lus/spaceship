@@ -15,10 +15,7 @@ import pm.lus.spaceship.routing.definition.endpoint.path.parts.PathPart;
 import pm.lus.spaceship.routing.definition.middleware.MiddlewareDefinition;
 
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -149,8 +146,8 @@ public class RouterFactory {
             return false;
         }
 
-        final List<PathPart> firstParts = first.getPath().getParts();
-        final List<PathPart> secondParts = second.getPath().getParts();
+        final List<PathPart> firstParts = new ArrayList<>(first.getPath().getParts());
+        final List<PathPart> secondParts = new ArrayList<>(second.getPath().getParts());
 
         // Remove the potential leading slash out of both lists
         if (firstParts.size() > 0 && firstParts.get(0) instanceof EmptyPart) {

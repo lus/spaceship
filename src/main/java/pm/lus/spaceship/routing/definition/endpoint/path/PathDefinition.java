@@ -165,6 +165,10 @@ public class PathDefinition {
             if (part == null && (!(partToCompare instanceof ParameterPart) || !((ParameterPart) partToCompare).isOptional())) {
                 return ProcessingResult.NOT_MATCHING;
             } else if (part == null) {
+                final ParameterPart parameterPart = (ParameterPart) partToCompare;
+                if (parameterPart.getDefaultValue().isPresent()) {
+                    parameters.add(parameterPart.getDefaultValue().get());
+                }
                 break;
             }
 

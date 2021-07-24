@@ -1,6 +1,6 @@
 package pm.lus.spaceship.endpoint.annotation.path;
 
-import pm.lus.spaceship.request.RequestMethod;
+import pm.lus.spaceship.request.meta.RequestMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;

@@ -4,8 +4,8 @@ import pm.lus.spaceship.controller.Controller;
 import pm.lus.spaceship.controller.annotation.ControllerOptions;
 import pm.lus.spaceship.endpoint.annotation.path.Get;
 import pm.lus.spaceship.endpoint.annotation.path.Path;
-import pm.lus.spaceship.request.RequestMethod;
 import pm.lus.spaceship.request.context.RequestContext;
+import pm.lus.spaceship.request.meta.RequestMethod;
 
 @ControllerOptions(basePath = "/basePath")
 public class ControllerTwo implements Controller {

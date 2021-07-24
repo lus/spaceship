@@ -2,7 +2,7 @@ package pm.lus.spaceship.server.impl;
 
 import com.sun.net.httpserver.HttpExchange;
 import pm.lus.spaceship.request.HttpRequest;
-import pm.lus.spaceship.request.RequestMethod;
+import pm.lus.spaceship.request.meta.RequestMethod;
 import pm.lus.spaceship.server.HttpServer;
 
 import java.io.IOException;
@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 /**
@@ -35,6 +36,7 @@ public class DefaultHttpServer implements HttpServer {
     @Override
     public void start(final InetSocketAddress address) throws IOException {
         this.server = com.sun.net.httpserver.HttpServer.create(address, 0);
+        this.server.setExecutor(Executors.newCachedThreadPool());
         this.server.start();
         this.server.createContext("/", this::acceptRequest);
     }
@@ -59,6 +61,7 @@ public class DefaultHttpServer implements HttpServer {
         final byte[] responseBody = request.getResponseBody();
         exchange.sendResponseHeaders(request.getResponseStatus(), responseBody.length);
         exchange.getResponseBody().write(responseBody);
+        exchange.close();
     }
 
     private void acceptRequest(final HttpExchange exchange) {

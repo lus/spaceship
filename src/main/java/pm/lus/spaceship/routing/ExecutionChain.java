@@ -16,11 +16,13 @@ public class ExecutionChain {
 
     private final List<MiddlewareDefinition> middlewaresBeforeEndpoint;
     private final EndpointDefinition endpoint;
+    private final List<Object> parameters;
     private final List<MiddlewareDefinition> middlewaresAfterEndpoint;
 
-    ExecutionChain(final List<MiddlewareDefinition> middlewaresBeforeEndpoint, final EndpointDefinition endpoint, final List<MiddlewareDefinition> middlewaresAfterEndpoint) {
+    ExecutionChain(final List<MiddlewareDefinition> middlewaresBeforeEndpoint, final EndpointDefinition endpoint, final List<Object> parameters, final List<MiddlewareDefinition> middlewaresAfterEndpoint) {
         this.middlewaresBeforeEndpoint = middlewaresBeforeEndpoint;
         this.endpoint = endpoint;
+        this.parameters = parameters;
         this.middlewaresAfterEndpoint = middlewaresAfterEndpoint;
     }
 
@@ -30,6 +32,10 @@ public class ExecutionChain {
 
     public EndpointDefinition getEndpoint() {
         return this.endpoint;
+    }
+
+    public List<Object> getParameters() {
+        return this.parameters;
     }
 
     public List<MiddlewareDefinition> getMiddlewaresAfterEndpoint() {

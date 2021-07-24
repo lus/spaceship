@@ -82,7 +82,7 @@ public class ParameterAdapterRegistry {
 
         @Override
         public int compareTo(final Entry entry) {
-            return Integer.compare(this.weight, entry.weight);
+            return Integer.compare(entry.getWeight(), this.weight);
         }
 
     }

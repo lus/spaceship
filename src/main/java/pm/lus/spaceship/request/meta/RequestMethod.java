@@ -1,4 +1,4 @@
-package pm.lus.spaceship.request;
+package pm.lus.spaceship.request.meta;
 
 /**
  * Represents a possible HTTP request method

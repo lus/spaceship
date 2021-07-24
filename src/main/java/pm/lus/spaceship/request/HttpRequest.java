@@ -1,5 +1,7 @@
 package pm.lus.spaceship.request;
 
+import pm.lus.spaceship.request.meta.RequestMethod;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
