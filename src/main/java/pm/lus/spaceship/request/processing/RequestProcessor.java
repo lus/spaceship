@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import pm.lus.spaceship.controller.Controller;
 import pm.lus.spaceship.request.HttpRequest;
 import pm.lus.spaceship.request.context.RequestContext;
+import pm.lus.spaceship.request.meta.HttpStatusCode;
 import pm.lus.spaceship.routing.ExecutionChain;
 import pm.lus.spaceship.routing.Router;
 import pm.lus.spaceship.routing.definition.middleware.MiddlewareDefinition;
@@ -65,7 +66,7 @@ public class RequestProcessor {
                 this.acceptRequest(request);
             } catch (final Exception exception) {
                 LOGGER.error("error while accepting request", exception);
-                request.setResponseStatus(500);
+                request.setResponseStatus(HttpStatusCode.INTERNAL_SERVER_ERROR);
                 request.setResponseBody("error while accepting request".getBytes(StandardCharsets.UTF_8));
                 try {
                     this.server.respond(request);
@@ -120,7 +121,7 @@ public class RequestProcessor {
 
             final Object[] parameters = ArrayUtils.merge(new Object[]{context}, executionChain.getParameters().toArray());
             method.invoke(controller, parameters);
-            
+
             if (!wasAccessible) {
                 method.setAccessible(false);
             }

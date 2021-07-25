@@ -5,6 +5,7 @@ import pm.lus.spaceship.app.config.DiscoveryConfig;
 import pm.lus.spaceship.app.config.ParameterAdapterConfig;
 import pm.lus.spaceship.app.config.RouterConfig;
 import pm.lus.spaceship.request.context.RequestContext;
+import pm.lus.spaceship.request.meta.HttpStatusCode;
 import pm.lus.spaceship.request.processing.RequestProcessor;
 import pm.lus.spaceship.routing.Router;
 import pm.lus.spaceship.routing.RouterFactory;
@@ -144,9 +145,9 @@ public class Spaceship {
             this.server = new DefaultHttpServer();
             this.address = new InetSocketAddress(8080);
             this.requestExecutor = Executors.newCachedThreadPool();
-            this.notFoundHandler = ctx -> ctx.status(404).body("not found");
-            this.throwableHandler = (context, throwable) -> {
-                context.status(500).body(throwable.getMessage());
+            this.notFoundHandler = ctx -> ctx.status(HttpStatusCode.NOT_FOUND).body("not found");
+            this.throwableHandler = (ctx, throwable) -> {
+                ctx.status(HttpStatusCode.INTERNAL_SERVER_ERROR).body(throwable.getMessage());
                 return false;
             };
         }
