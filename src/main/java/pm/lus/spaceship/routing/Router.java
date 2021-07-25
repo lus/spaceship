@@ -6,10 +6,10 @@ import pm.lus.spaceship.middleware.Middleware;
 import pm.lus.spaceship.request.HttpRequest;
 import pm.lus.spaceship.routing.definition.controller.ControllerDefinition;
 import pm.lus.spaceship.routing.definition.endpoint.EndpointDefinition;
-import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterAdapter;
-import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterAdapterRegistry;
 import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterDefinition;
 import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterParseException;
+import pm.lus.spaceship.routing.definition.endpoint.parameter.adapter.ParameterAdapter;
+import pm.lus.spaceship.routing.definition.endpoint.parameter.adapter.ParameterAdapterRegistry;
 import pm.lus.spaceship.routing.definition.endpoint.path.PathDefinition;
 import pm.lus.spaceship.routing.definition.middleware.MiddlewareDefinition;
 import pm.lus.spaceship.util.collection.Pair;
@@ -58,7 +58,7 @@ public class Router {
     /**
      * Sorts all endpoints depending on their individual parameter weight
      * This is mandatory for parameter parsing to work properly
-     * This should be done whenever a new {@link pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterAdapter} is registered
+     * This should be done whenever a new {@link ParameterAdapter} is registered
      */
     public void sortEndpoints() {
         this.usedEndpoints.clear();

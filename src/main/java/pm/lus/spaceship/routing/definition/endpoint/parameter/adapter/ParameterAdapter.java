@@ -1,4 +1,6 @@
-package pm.lus.spaceship.routing.definition.endpoint.parameter;
+package pm.lus.spaceship.routing.definition.endpoint.parameter.adapter;
+
+import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterParseException;
 
 /**
  * Has to be implemented for types that should be able to be passed to endpoint handlers as parameters

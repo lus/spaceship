@@ -1,7 +1,7 @@
 package pm.lus.spaceship.app.config;
 
-import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterAdapter;
-import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterAdapterRegistry;
+import pm.lus.spaceship.routing.definition.endpoint.parameter.adapter.ParameterAdapter;
+import pm.lus.spaceship.routing.definition.endpoint.parameter.adapter.ParameterAdapterRegistry;
 
 /**
  * Helps configuring the {@link ParameterAdapterRegistry} by wrapping it using the builder state

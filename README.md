@@ -1,2 +1,3 @@
 # spaceship
-An extendible, lightweight and annotation-based web framework written in Java
+
+An extendable, lightweight and annotation-based web framework written in Java

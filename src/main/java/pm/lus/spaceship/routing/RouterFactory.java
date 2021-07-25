@@ -7,7 +7,7 @@ import pm.lus.spaceship.dependency.DependencyInjector;
 import pm.lus.spaceship.middleware.Middleware;
 import pm.lus.spaceship.routing.definition.controller.ControllerDefinition;
 import pm.lus.spaceship.routing.definition.endpoint.EndpointDefinition;
-import pm.lus.spaceship.routing.definition.endpoint.parameter.ParameterAdapterRegistry;
+import pm.lus.spaceship.routing.definition.endpoint.parameter.adapter.ParameterAdapterRegistry;
 import pm.lus.spaceship.routing.definition.endpoint.path.parts.EmptyPart;
 import pm.lus.spaceship.routing.definition.endpoint.path.parts.LiteralPart;
 import pm.lus.spaceship.routing.definition.endpoint.path.parts.ParameterPart;

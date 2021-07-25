@@ -1,4 +1,6 @@
-package pm.lus.spaceship.routing.definition.endpoint.parameter;
+package pm.lus.spaceship.routing.definition.endpoint.parameter.adapter;
+
+import pm.lus.spaceship.routing.definition.endpoint.parameter.adapter.impl.*;
 
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +19,14 @@ public class ParameterAdapterRegistry {
 
     public ParameterAdapterRegistry() {
         this.adapters = new ConcurrentHashMap<>();
+
+        this.register(String.class, new StringParameterAdapter(), 0);
+        this.register(Boolean.class, new BooleanParameterAdapter(), 10);
+        this.register(Double.class, new NonInfiniteDoubleParameterAdapter(), 20);
+        this.register(Float.class, new NonInfiniteFloatParameterAdapter(), 30);
+        this.register(Long.class, new LongParameterAdapter(), 40);
+        this.register(Integer.class, new IntegerParameterAdapter(), 50);
+        this.register(Short.class, new ShortParameterAdapter(), 60);
     }
 
     /**
